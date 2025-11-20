@@ -1,0 +1,385 @@
+{% extends "base.html" %}
+
+{% block title %}Items Reservados{% endblock %}
+
+{% block body %}
+<style>
+    .compact-table th,
+    .compact-table td {
+        padding: .25rem .3rem !important;
+        line-height: 1 !important;
+        font-size: 0.65rem !important;
+    }
+    .section-title {
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        color: white;
+        font-size: 1.25rem;
+        padding-left: 0.5rem;
+    }
+</style>
+
+<div class="container-fluid px-0 py-1">
+
+    <!-- Botón para agregar pedido -->
+    <div class="d-flex justify-content-end px-3 mb-2">
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#agregarPedidoModal">
+            Agregar Pedido
+        </button>
+    </div>
+
+    <!-- PEDIDOS - LIMA -->
+    <h2 class="section-title">Pedidos - Lima</h2>
+    <div class="table-responsive bg-white p-1 rounded mb-4">
+        <table class="table table-sm compact-table w-100">
+            <thead class="table-dark">
+                <tr><th>#</th><th>Pedido</th><th>Fecha</th><th>Acciones</th></tr>
+            </thead>
+            <tbody>
+                {% for ped in pedidos_lima %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ ped.numero }}</td>
+                    <td>{{ ped.fecha_creacion|date:"d/m/Y" }}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#detallePedidoModal-{{ ped.id }}">
+                            Ver detalles
+                        </button>
+                        <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#eliminarPedidoModal-{{ ped.id }}">
+                            Eliminar
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr class="text-center"><td colspan="4">No hay pedidos en Lima.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- PEDIDOS - PROVINCIA -->
+    <h2 class="section-title">Pedidos - Provincia</h2>
+    <div class="table-responsive bg-white p-1 rounded mb-4">
+        <table class="table table-sm compact-table w-100">
+            <thead class="table-dark">
+                <tr><th>#</th><th>Pedido</th><th>Fecha</th><th>Acciones</th></tr>
+            </thead>
+            <tbody>
+                {% for ped in pedidos_provincia %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ ped.numero }}</td>
+                    <td>{{ ped.fecha_creacion|date:"d/m/Y" }}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#detallePedidoModal-{{ ped.id }}">
+                            Ver detalles
+                        </button>
+                        <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#eliminarPedidoModal-{{ ped.id }}">
+                            Eliminar
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr class="text-center"><td colspan="4">No hay pedidos en Provincia.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block modals %}
+<!-- Modal: Crear Nuevo Pedido -->
+<div class="modal fade" id="agregarPedidoModal" tabindex="-1" aria-labelledby="agregarPedidoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <form method="POST" action="{% url 'academico:agregar_pedido_items_reservados' %}" id="pedidoForm">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="agregarPedidoLabel">Crear Nuevo Pedido</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          {% if messages %}
+              {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{% autoescape off %}{{ message }}{% endautoescape %}</div>
+              {% endfor %}
+          {% endif %}
+          <div class="mb-3">
+            <label for="codigosTextarea" class="form-label">Códigos de Ítems (uno por línea)</label>
+            <textarea id="codigosTextarea" name="codigos" class="form-control" rows="3" placeholder="SYS10295↵CPU21643↵PRT09928"></textarea>
+            <div class="form-text">Opcional: Agrega códigos individuales del inventario Excel, uno por línea.</div>
+          </div>
+          <div class="mb-3">
+            <label for="localidadSelect" class="form-label">Localidad Destino</label>
+            <select id="localidadSelect" name="localidad" class="form-select" required>
+              <option value="" disabled selected>Seleccione localidad</option>
+              {% for loc in localidades %}
+                <option value="{{ loc }}">{{ loc }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- NUEVA SECCIÓN: Selección de Equipamientos -->
+          <div class="mb-3 mt-4">
+            <label class="form-label"><b>Equipamientos disponibles (agregue cantidades):</b></label>
+            <div class="table-responsive">
+              <table class="table table-sm table-bordered align-middle">
+                <thead class="table-light">
+                  <tr>
+                    <th>Producto</th>
+                    <th>Capacidad</th>
+                    <th>Memoria</th>
+                    <th>Modelo</th>
+                    <th>Disponible</th>
+                    <th>Cant. a reservar</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for equip in equipamientos %}
+                  <tr>
+                    <td>{{ equip.nombre_producto }}</td>
+                    <td>{{ equip.capacidad }}</td>
+                    <td>{{ equip.memoria|default:"-" }}</td>
+                    <td>{{ equip.modelo|default:"-" }}</td>
+                    <td>{{ equip.cantidad }}</td>
+                    <td style="max-width:90px;">
+                      <input type="number" name="equip_{{ equip.codigo }}" class="form-control form-control-sm"
+                             min="0" max="{{ equip.cantidad }}" value="0">
+                      <input type="hidden" name="equip_codigo_list" value="{{ equip.codigo }}">
+                    </td>
+                  </tr>
+                  {% empty %}
+                  <tr>
+                    <td colspan="6" class="text-center text-muted">No hay equipamientos disponibles.</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            <small class="text-muted">Deja la cantidad en 0 si no deseas agregar ese equipamiento al pedido.</small>
+          </div>
+          <small class="text-muted">Puedes agregar ítems por código, y/o equipamientos por cantidad.</small>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Crear Pedido</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modals de detalle y eliminar pedidos para Lima -->
+{% for ped in pedidos_lima %}
+<div class="modal fade" id="detallePedidoModal-{{ ped.id }}" tabindex="-1" aria-labelledby="detallePedidoLabel-{{ ped.id }}" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="detallePedidoLabel-{{ ped.id }}">Detalles del Pedido {{ ped.numero }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        {% if ped.localidad %}
+        <p><strong>Localidad destino:</strong> {{ ped.localidad }}</p>
+        {% endif %}
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Código</th>
+              <th>Nombre</th>
+              <th>Serie</th>
+              <th>Fecha estimada</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for li in ped.lineas.all %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ li.item.codigo }}</td>
+              <td>{{ li.item.nombre }}</td>
+              <td>{{ li.item.numerodeserie }}</td>
+              <td>{{ li.fecha_entrega_estimada|date:"d/m/Y" }}</td>
+              <td>
+                <span class="badge bg-primary">{{ li.item.estado }}</span>
+              </td>
+            </tr>
+            {% endfor %}
+            <!-- Mostrar equipamientos pedidos (si hay) -->
+            {% for epeq in ped.equipamientos.all %}
+            <tr>
+              <td>{{ forloop.parentloop.counter0|add:forloop.counter }}</td>
+              <td>{{ epeq.equipamiento.codigo }}</td>
+              <td>{{ epeq.equipamiento.nombre_producto }}</td>
+              <td>-</td>
+              <td>{{ epeq.fecha_entrega_estimada|date:"d/m/Y" }}</td>
+              <td>
+                <span class="badge bg-secondary">Equipamiento</span>
+                <span class="badge bg-info">{{ epeq.cantidad }} und.</span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#confirmarRealizadoModal-{{ ped.id }}">
+          Realizado
+        </button>
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal Confirmar Realizado -->
+<div class="modal fade" id="confirmarRealizadoModal-{{ ped.id }}" tabindex="-1" aria-labelledby="confirmarRealizadoLabel-{{ ped.id }}" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form method="POST" action="{% url 'academico:marcar_pedido_aplicado' ped.id %}">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="confirmarRealizadoLabel-{{ ped.id }}">Confirmar acción</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <p>¿Estás seguro que deseas marcar <b>TODOS</b> los ítems del pedido <strong>{{ ped.numero }}</strong> como <b>Aplicado</b>? Esta acción no se puede deshacer.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Sí, marcar como Aplicado</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<!-- Modal Eliminar Pedido -->
+<div class="modal fade" id="eliminarPedidoModal-{{ ped.id }}" tabindex="-1" aria-labelledby="eliminarPedidoLabel-{{ ped.id }}" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form method="POST" action="{% url 'academico:eliminar_pedido' ped.id %}">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="eliminarPedidoLabel-{{ ped.id }}">Eliminar Pedido</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <p>¿Estás seguro que deseas eliminar el pedido <strong>{{ ped.numero }}</strong>? Esta acción no se puede deshacer.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endfor %}
+
+<!-- Modals de detalle y eliminar pedidos para Provincia -->
+{% for ped in pedidos_provincia %}
+<div class="modal fade" id="detallePedidoModal-{{ ped.id }}" tabindex="-1" aria-labelledby="detallePedidoLabel-{{ ped.id }}" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="detallePedidoLabel-{{ ped.id }}">Detalles del Pedido {{ ped.numero }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        {% if ped.localidad %}
+        <p><strong>Localidad destino:</strong> {{ ped.localidad }}</p>
+        {% endif %}
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Código</th>
+              <th>Nombre</th>
+              <th>Serie</th>
+              <th>Fecha estimada</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for li in ped.lineas.all %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ li.item.codigo }}</td>
+              <td>{{ li.item.nombre }}</td>
+              <td>{{ li.item.numerodeserie }}</td>
+              <td>{{ li.fecha_entrega_estimada|date:"d/m/Y" }}</td>
+              <td>
+                <span class="badge bg-primary">{{ li.item.estado }}</span>
+              </td>
+            </tr>
+            {% endfor %}
+            {% for epeq in ped.equipamientos.all %}
+            <tr>
+              <td>{{ forloop.parentloop.counter0|add:forloop.counter }}</td>
+              <td>{{ epeq.equipamiento.codigo }}</td>
+              <td>{{ epeq.equipamiento.nombre_producto }}</td>
+              <td>-</td>
+              <td>{{ epeq.fecha_entrega_estimada|date:"d/m/Y" }}</td>
+              <td>
+                <span class="badge bg-secondary">Equipamiento</span>
+                <span class="badge bg-info">{{ epeq.cantidad }} und.</span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#confirmarRealizadoModal-{{ ped.id }}">
+          Realizado
+        </button>
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal Confirmar Realizado -->
+<div class="modal fade" id="confirmarRealizadoModal-{{ ped.id }}" tabindex="-1" aria-labelledby="confirmarRealizadoLabel-{{ ped.id }}" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form method="POST" action="{% url 'academico:marcar_pedido_aplicado' ped.id %}">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="confirmarRealizadoLabel-{{ ped.id }}">Confirmar acción</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <p>¿Estás seguro que deseas marcar <b>TODOS</b> los ítems del pedido <strong>{{ ped.numero }}</strong> como <b>Aplicado</b>? Esta acción no se puede deshacer.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Sí, marcar como Aplicado</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<!-- Modal Eliminar Pedido -->
+<div class="modal fade" id="eliminarPedidoModal-{{ ped.id }}" tabindex="-1" aria-labelledby="eliminarPedidoLabel-{{ ped.id }}" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form method="POST" action="{% url 'academico:eliminar_pedido' ped.id %}">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="eliminarPedidoLabel-{{ ped.id }}">Eliminar Pedido</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <p>¿Estás seguro que deseas eliminar el pedido <strong>{{ ped.numero }}</strong>? Esta acción no se puede deshacer.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endfor %}
+{% endblock %}

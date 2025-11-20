@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    {% load static %}
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+    <link href="https://fonts.googleapis.com/css?family=Inter:400,500,600&display=swap" rel="stylesheet">
+
+    <style>
+        @media print {
+            body * {
+                visibility: hidden !important;
+            }
+            #print-section, #print-section * {
+                visibility: visible !important;
+            }
+            #print-section {
+                position: absolute;
+                left: 0; top: 0;
+                width: 100vw;
+                background: #fff;
+                padding: 28px 24px 24px 24px;
+                z-index: 9999;
+            }
+            #print-section h1 {
+                margin-bottom: 18px;
+                font-size: 2.2rem;
+                color: #222;
+                font-weight: bold;
+            }
+            #print-section table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                background: #fff !important;
+                font-size: 1rem !important;
+                margin-top: 0;
+            }
+            #print-section th, #print-section td {
+                border: 1.5px solid #bbb !important;
+                padding: 8px 12px !important;
+                color: #222 !important;
+                text-align: center !important;
+            }
+            #print-section th {
+                background: #efefef !important;
+                font-size: 1.07rem;
+                font-weight: bold !important;
+                text-align: center !important;
+            }
+            #print-section td {
+                background: #fff !important;
+            }
+            /* Ocultar columnas de acción (editar/eliminar), buscador y botón imprimir */
+            .no-print, #searchInput, .btn, .action-buttons, .modal, .modal-backdrop {
+                display: none !important;
+            }
+        }
+        body, html {
+            height: 100%;
+            margin: 0;
+        }
+        .background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("{% static 'image/bancom.png' %}") center/cover no-repeat;
+            z-index: -1;
+        }
+        .container {
+            position: relative;
+            z-index: 2;
+            margin-top: 80px;
+        }
+
+        /* ---- NAVBAR CUSTOM ---- */
+        .custom-navbar-bancom {
+            width: 100%;
+            background: #d32f2f;
+            padding: 0;
+            margin: 0;
+            min-height: 56px;
+            border-bottom: 2px solid #a11b1b;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            font-family: 'Arial', sans-serif;
+            z-index: 1000;
+            position: relative;
+        }
+        .navbar-list-bancom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0;
+            padding: 0 6px 0 0;
+            list-style: none;
+            height: 56px;
+        }
+        .navbar-list-bancom li {
+            display: flex;
+            align-items: center;
+            height: 56px;
+            font-weight: bold;
+            margin: 0 2px;
+        }
+        .navbar-list-bancom li:not(.salir-li) {
+            flex: none;
+        }
+        .navbar-list-bancom a, .navbar-list-bancom .nav-form-link {
+            color: #fff;
+            text-decoration: none;
+            padding: 0 14px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            font-size: 16px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            transition: background 0.17s, color 0.15s;
+            border-radius: 2px;
+        }
+        .navbar-list-bancom a:hover, .navbar-list-bancom .nav-form-link:hover {
+            background: rgba(255,255,255,0.13);
+            color: #111;
+        }
+        .navbar-list-bancom .salir-li {
+            margin-left: auto;
+            height: 56px;
+            display: flex;
+            align-items: center;
+        }
+        /* ---- BOTÓN SALIR SUPER CUSTOM ---- */
+        .salida-btn-bancom {
+            background: #bbb !important;
+            border: none !important;
+            color: #222 !important;
+            font-weight: bold !important;
+            padding: 7px 30px !important;
+            border-radius: 14px !important;
+            font-size: 18px !important;
+            margin-right: 14px !important;
+            letter-spacing: 0.5px !important;
+            outline: none !important;
+            text-decoration: none !important;
+            display: flex !important;
+            align-items: center !important;
+            height: 38px !important;
+            box-shadow: 0 2px 2px rgba(0,0,0,0.10) !important;
+            transition: background 0.17s, color 0.13s !important;
+            justify-content: center !important;
+        }
+        .salida-btn-bancom:hover, .salida-btn-bancom:focus {
+            background: #888 !important;
+            color: #fff !important;
+        }
+        .navbar-list-bancom form {
+            display: flex;
+            align-items: center;
+            margin: 0;
+        }
+    </style>
+    <style>
+        .mape-promedio-card {
+            transition: box-shadow .15s;
+        }
+        .mape-promedio-card:hover {
+            box-shadow: 0 6px 28px 0 #0003;
+        }
+    </style>
+
+    <!-- Bootstrap CSS v5.3.3 (opcional para otras partes de tu sitio) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'css/gestionItem.css' %}">
+</head>
+
+<body>
+    <!-- NAVBAR PERSONALIZADO -->
+    <nav class="custom-navbar-bancom">
+        <ul class="navbar-list-bancom">
+            <li><a href="#">BANCOM</a></li>
+            <li><a href="{% url 'academico:dashboard' %}">Dashboard</a></li>
+            <li><a href="{% url 'academico:modulo1' %}">Hardware y Periféricos</a></li>
+            <li><a href="{% url 'academico:inventario' %}">Inventario</a></li>
+            <li><a href="{% url 'academico:items_reservados' %}">Pedidos</a></li>
+            <li><a href="{% url 'academico:pedidos_cambio_reservado_a_aplicado' %}">Realizados</a></li>
+            <li>
+                <form method="POST" action="{% url 'academico:calcular_mape' %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button class="nav-form-link" type="submit">Calcular MAPE</button>
+                </form>
+            </li>
+            <li><a href="{% url 'academico:ver_mape' %}">Historial MAPE</a></li>
+            <li><a href="{% url 'academico:informacion' %}">Información</a></li>
+            <li class="salir-li">
+                <a href="{% url 'academico:logout' %}" class="salida-btn-bancom">SALIR</a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="background-container"></div>
+
+    <div class="container mt-5">
+        {% block body %}{% endblock %}
+    </div>
+
+    {# aquí inyectamos TODOS los modales de la página #}
+    {% block modals %}{% endblock %}
+
+    <!-- Bootstrap JS v5.3.3 (sin Popper, suficiente para modales) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
+        integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
+        crossorigin="anonymous"></script>
+    <!-- tu JS local -->
+    <script src="{% static 'js/gestionItem.js' %}"></script>
+
+    {% block extra_js %}{% endblock %}
+<!-- BANCI: Chatbot minimalista estilo Hostinger -->
+<style>
+#chatbot-bubble {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 9999;
+    font-family: 'Inter', Arial, sans-serif !important;
+}
+#open-chatbot {
+    background: #d32f2f;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    box-shadow: 0 4px 12px #0003;
+    font-size: 30px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: box-shadow 0.2s;
+}
+#open-chatbot:hover { box-shadow: 0 8px 24px #d32f2f44; }
+
+#chatbot-widget {
+    display: none;
+    width: 370px;
+    max-width: 95vw;
+    height: 500px;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 6px 32px #0005;
+    overflow: hidden;
+    flex-direction: column;
+    display: flex;
+    position: relative;
+    font-family: 'Inter', Arial, sans-serif !important;
+    animation: pop-in .22s cubic-bezier(.49,1.9,.61,.81);
+}
+@keyframes pop-in {
+    0% { opacity:0; transform:scale(.9);}
+    100% {opacity:1; transform:scale(1);}
+}
+#chatbot-header {
+    background: #fff;
+    color: #1b1b1b;
+    padding: 16px 20px 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1.7px solid #d32f2f;
+}
+#chatbot-header .title {
+    font-weight: 600;
+    font-size: 1.13rem;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+#chatbot-header .title .banci-icon {
+    background: #ffeaea;
+    color: #d32f2f;
+    border-radius: 50%;
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.35rem;
+}
+#chatbot-header .actions button {
+    background: none; border: none; color: #888; font-size: 19px; margin-left: 6px; cursor: pointer;
+    padding: 2px 4px; border-radius: 5px;
+    transition: background 0.12s, color 0.14s;
+}
+#chatbot-header .actions button:hover { background: #f1f1f1; color: #d32f2f; }
+
+#mensajes {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px 16px 6px 16px;
+    background: #fafbfc;
+    font-size: 11px !important;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.msj-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+}
+.msj-banci {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+}
+.msj-yo {
+    flex-direction: row-reverse;
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+}
+
+.burbuja-banci {
+    background: #f4f4f8;
+    color: #181818;
+    padding: 13px 17px;
+    border-radius: 13px;
+    font-size: 12px;
+    font-weight: 400;
+    max-width: 270px;
+    min-width: 70px;
+    word-break: break-word;
+    box-shadow: 0 1px 7px #d32f2f0c;
+    border: none;
+}
+.burbuja-yo {
+    background: #fff;
+    color: #181818;
+    padding: 13px 17px;
+    border-radius: 13px;
+    font-size: 12px;
+    font-weight: 400;
+    max-width: 270px;
+    min-width: 70px;
+    word-break: break-word;
+    box-shadow: 0 1px 7px #cfcfcf18;
+    border: 1.1px solid #eee;
+}
+
+.icono-banci {
+    background: #ffeaea;
+    color: #d32f2f;
+    border-radius: 50%;
+    width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.19rem;
+    margin-top: 2px;
+}
+.icono-yo {
+    background: #ededed;
+    color: #aaa;
+    border-radius: 50%;
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.08rem;
+    margin-top: 3px;
+}
+.msj-row, .msj-banci, .msj-yo { width: 100%; }
+
+#chatbot-form {
+    display: flex;
+    align-items: center;
+    padding: 13px 13px 13px 14px;
+    background: #f7f7f9;
+    border-top: 1px solid #ededed;
+    border-radius: 0 0 18px 18px;
+    min-height: 55px;
+    gap: 7px;
+    margin: 0;
+}
+#pregunta {
+    flex: 1;
+    padding: 11px 16px;
+    border-radius: 10px;
+    border: 1.2px solid #e0e0e0;
+    font-size: 13px;
+    outline: none;
+    background: #fff;
+    font-family: 'Inter', Arial, sans-serif !important;
+    font-weight: 400;
+    transition: border 0.15s;
+    box-shadow: none;
+}
+#pregunta::placeholder {
+    color: #7c7c7c;
+    font-size: 13px;
+    font-weight: 400;
+    opacity: 1;
+}
+#pregunta:focus {
+    border: 1.4px solid #d32f2f;
+}
+#btn-enviar-chatbot {
+    background: #eee;
+    color: #aaa;
+    border: none;
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    margin-left: 3px;
+    transition: background 0.15s, color 0.12s;
+    box-shadow: none;
+    cursor: pointer;
+    outline: none;
+}
+#btn-enviar-chatbot.enabled {
+    background: #d32f2f;
+    color: #fff;
+}
+#btn-enviar-chatbot:active { background: #a11b1b; }
+
+#modal-limpiar-chat {
+    display: none;
+    position: absolute;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background: #0005;
+    z-index: 50;
+    align-items: center;
+    justify-content: center;
+}
+#modal-limpiar-chat.active,
+#modal-limpiar-chat[style*="display: flex"] {
+    display: flex !important;
+}
+#modal-limpiar-chat .modal-box {
+    background: #fff;
+    border-radius: 16px;
+    padding: 32px 24px 28px 24px;
+    box-shadow: 0 6px 40px #0005;
+    width: 94%;
+    max-width: 330px;
+    margin: auto;
+    text-align: center;
+    font-family: 'Inter', Arial, sans-serif !important;
+    font-size: 13px;
+}
+#modal-limpiar-chat .modal-title {
+    font-size: 1.13rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #d32f2f;
+}
+#modal-limpiar-chat .modal-desc {
+    color: #444;
+    font-size: 13px;
+    margin-bottom: 22px;
+}
+#modal-limpiar-chat .modal-btns {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+}
+#modal-limpiar-chat button {
+    border-radius: 8px;
+    padding: 7px 18px;
+    font-size: 13px;
+    cursor: pointer;
+    font-weight: bold;
+    border: none;
+    font-family: 'Inter', Arial, sans-serif !important;
+}
+#cancelar-limpiar-chat {
+    background: #fff;
+    color: #d32f2f;
+    border: 1.3px solid #d32f2f;
+}
+#confirmar-limpiar-chat {
+    background: #d32f2f;
+    color: #fff;
+    border: none;
+}
+@media (max-width: 600px) {
+    .burbuja-banci, .burbuja-yo {max-width: 70vw;}
+}
+</style>
+
+<div id="chatbot-bubble">
+  <button id="open-chatbot">
+    <i class="bi bi-robot"></i>
+  </button>
+  <div id="chatbot-widget">
+    <div id="chatbot-header">
+      <span class="title">
+        <span class="banci-icon"><i class="bi bi-robot"></i></span> Banci
+      </span>
+      <span class="actions">
+        <button id="clear-chatbot" title="Borrar historial"><i class="bi bi-trash"></i></button>
+        <button id="close-chatbot" title="Cerrar" style="font-size:23px;font-weight:bold;">×</button>
+      </span>
+    </div>
+    <div id="mensajes"></div>
+    <!-- ¡El modal va FUERA del formulario! -->
+    <form id="chatbot-form" method="post" autocomplete="off">
+      {% csrf_token %}
+      <input type="text" name="pregunta" id="pregunta" placeholder="Cuéntanos cómo podemos ayudarte..." required>
+      <button type="submit" id="btn-enviar-chatbot" title="Enviar">
+        <i class="bi bi-send-fill"></i>
+      </button>
+    </form>
+    <div id="modal-limpiar-chat">
+      <div class="modal-box">
+        <div class="modal-title">Limpiar chat</div>
+        <div class="modal-desc">
+          Después de borrar el historial, no podrás acceder a los chats anteriores.
+        </div>
+        <div class="modal-btns">
+          <button id="cancelar-limpiar-chat">Cancelar</button>
+          <button id="confirmar-limpiar-chat">Limpiar chat</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const keyHistorial = "chatbot_bancom_historial_v1";
+
+document.getElementById('open-chatbot').onclick = function() {
+    document.getElementById('chatbot-widget').style.display = 'flex';
+    this.style.display = 'none';
+    setTimeout(()=>document.getElementById('pregunta').focus(), 120);
+    mostrarHistorial();
+};
+document.getElementById('close-chatbot').onclick = function() {
+    document.getElementById('chatbot-widget').style.display = 'none';
+    document.getElementById('open-chatbot').style.display = '';
+};
+
+document.getElementById('clear-chatbot').onclick = function() {
+    document.getElementById('modal-limpiar-chat').classList.add('active');
+};
+document.getElementById('cancelar-limpiar-chat').onclick = function() {
+    document.getElementById('modal-limpiar-chat').classList.remove('active');
+};
+document.getElementById('confirmar-limpiar-chat').onclick = function() {
+    localStorage.removeItem(keyHistorial);
+    mostrarHistorial();
+    document.getElementById('modal-limpiar-chat').classList.remove('active');
+};
+
+function mostrarHistorial() {
+    const mensajes = document.getElementById('mensajes');
+    let historial = [];
+    try {
+        historial = JSON.parse(localStorage.getItem(keyHistorial)) || [];
+    } catch(e){}
+    mensajes.innerHTML = "";
+    if(historial.length === 0) {
+        mensajes.innerHTML = `
+        <div class="msj-row msj-banci">
+            <div class="icono-banci"><i class="bi bi-robot"></i></div>
+            <div class="burbuja-banci">
+                ¡Hola! Soy Banci, tu asistente logístico Bancom.<br>
+                ¿En qué puedo ayudarte?
+            </div>
+        </div>`;
+    }
+    for(const h of historial) {
+        if(h.de=='yo') {
+            mensajes.innerHTML += `
+            <div class="msj-row msj-yo">
+                <div class="icono-yo"><i class="bi bi-person"></i></div>
+                <div class="burbuja-yo">${h.texto}</div>
+            </div>`;
+        } else {
+            mensajes.innerHTML += `
+            <div class="msj-row msj-banci">
+                <div class="icono-banci"><i class="bi bi-robot"></i></div>
+                <div class="burbuja-banci">${h.texto}</div>
+            </div>`;
+        }
+    }
+    mensajes.scrollTop = mensajes.scrollHeight;
+}
+
+// -------- Habilitar / deshabilitar botón enviar --------
+const inputPregunta = document.getElementById('pregunta');
+const btnEnviar = document.getElementById('btn-enviar-chatbot');
+function updateSendBtnState() {
+    if(inputPregunta.value.trim().length > 0) {
+        btnEnviar.classList.add('enabled');
+        btnEnviar.disabled = false;
+    } else {
+        btnEnviar.classList.remove('enabled');
+        btnEnviar.disabled = true;
+    }
+}
+inputPregunta.addEventListener('input', updateSendBtnState);
+window.addEventListener('DOMContentLoaded', updateSendBtnState);
+
+function guardarMensaje(de, texto) {
+    let historial = [];
+    try {
+        historial = JSON.parse(localStorage.getItem(keyHistorial)) || [];
+    } catch(e){}
+    historial.push({de, texto});
+    localStorage.setItem(keyHistorial, JSON.stringify(historial));
+}
+
+document.getElementById('chatbot-form').onsubmit = async function(e) {
+    e.preventDefault();
+    const pregunta = inputPregunta.value;
+    guardarMensaje("yo", pregunta);
+    mostrarHistorial();
+    inputPregunta.value = '';
+    updateSendBtnState();
+    const response = await fetch("{% url 'academico:chatbot_faq' %}", {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `pregunta=${encodeURIComponent(pregunta)}`
+    });
+    const data = await response.json();
+    guardarMensaje("bot", data.respuesta);
+    mostrarHistorial();
+};
+
+window.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('chatbot-widget').style.display = 'none';
+    document.getElementById('open-chatbot').style.display = '';
+    mostrarHistorial();
+    updateSendBtnState();
+});
+</script>

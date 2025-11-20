@@ -1,0 +1,120 @@
+{# templates/calcular_mape.html #}
+{% extends "base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Calcular MAPE{% endblock %}
+
+{% block body %}
+
+<!-- ENCABEZADO HERO CON ICONO -->
+<div style="display: flex; justify-content: center; margin-top: 40px;">
+  <div style="
+      background: linear-gradient(90deg, #c52f41 40%, #e74949 100%);
+      padding: 36px 0 28px 0;
+      border-radius: 6px;
+      width: 80vw;
+      max-width: 1100px;
+      min-width: 320px;
+      margin-bottom: 38px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.07);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    ">
+    <span class="material-symbols-outlined" style="font-size: 2.5rem; color: #fff; margin-right: 18px;">
+      query_stats
+    </span>
+    <span style="font-size: 2.2rem; color: #fff; font-weight: bold; letter-spacing: 1.2px;">
+      Cálculo del MAPE
+    </span>
+  </div>
+</div>
+
+<!-- TARJETA DEL FORMULARIO -->
+<div class="container">
+
+  <div class="card shadow-lg border-0 rounded-4 mx-auto" style="max-width: 960px;">
+    <div class="card-header" style="background: #d32f2f; color: #fff; text-align: center; border-top-left-radius: 1rem; border-top-right-radius: 1rem;">
+      <h4 class="my-2" style="font-weight: bold;">
+        <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 1.6rem; margin-right: 8px;">
+          playlist_add
+        </span>
+        Registrar nueva proyección
+      </h4>
+    </div>
+
+    <div class="card-body px-5 py-4">
+
+      <form method="post">
+        {% csrf_token %}
+
+        <div class="row g-4 align-items-end">
+
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Fecha</label>
+            {{ form.fecha|add_class:"form-control shadow-sm" }}
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Ítem</label>
+            {{ form.item|add_class:"form-select shadow-sm" }}
+          </div>
+
+          <div class="col-md-2">
+            <label class="form-label fw-semibold">Proyectada</label>
+            {{ form.venta_proyectada|add_class:"form-control shadow-sm"|attr:"required" }}
+          </div>
+
+          <div class="col-md-2">
+            <label class="form-label fw-semibold">Real</label>
+            {{ form.venta_real|add_class:"form-control shadow-sm"|attr:"required" }}
+          </div>
+
+          <div class="col-md-1 text-center">
+            <!-- BOTÓN CUADRADO VERDE, ÍCONO DISQUETE MATERIAL -->
+            <button name="registrar" type="submit" style="
+              width: 48px; height: 48px; background: #219160; border: none; border-radius: 12px;
+              display: flex; align-items: center; justify-content: center; margin-top: 7px;
+              box-shadow: 0 2px 8px rgba(33,145,96,0.08); transition: background 0.18s;
+            " title="Guardar proyección">
+              <span class="material-symbols-outlined" style="font-size: 2rem; color: #fff;">
+                save
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Botón Calcular MAPE -->
+        <div class="text-center mt-4">
+          <button name="calcular" class="btn btn-outline-danger px-5" style="font-weight: bold;">
+            <span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 6px;">
+              calculate
+            </span>
+            Calcular MAPE Manual
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Alertas y resultado -->
+  <div class="mt-4" style="max-width: 960px; margin-inline: auto;">
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} shadow-sm fade show mb-3" role="alert">
+      {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    {% if mape_result %}
+    <div class="alert alert-success shadow-sm">
+      <strong>MAPE:</strong> {{ mape_result }} %
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+
+{% endblock %}

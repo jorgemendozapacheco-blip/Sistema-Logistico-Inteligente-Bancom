@@ -1,0 +1,40 @@
+.mape-card {
+    color: #222;
+    border-radius: 18px;
+    border: none;
+    box-shadow: 0 8px 30px #0002;
+    padding: 28px 18px 16px 18px;
+    margin: 0 auto 0 auto;
+    font-weight: bold;
+}
+
+/* COLORES EXACTOS SEGÚN TU TABLA */
+.mape-bg-success { background: #43b06e !important; color: #222 !important; }
+.mape-bg-warning { background: #ffce3a !important; color: #222 !important; }
+.mape-bg-orange  { background: #ff9f40 !important; color: #222 !important; }
+.mape-bg-danger  { background: #f05e62 !important; color: #222 !important; }
+.mape-promedio-card .card-title,
+.mape-promedio-card .card-value { color: #222 !important; }
+/* BORDES Y FUENTES MEJORADAS PARA LA TARJETA MAPE */
+.mape-promedio-card {
+    border-radius: 28px;
+    border: none;
+    box-shadow: 0 8px 30px #0002;
+    padding: 35px 20px 25px 20px;
+    margin: 0 auto 18px auto;
+    font-family: 'Nunito', 'Segoe UI', Arial, sans-serif;
+}
+.mape-promedio-card .card-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #7c4c13 !important;
+    opacity: 0.97;
+    margin-bottom: 8px;
+}
+.mape-promedio-card .card-value {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: #222 !important;
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block body %}
+<h2>Chatbot Logístico</h2>
+<div id="chatbox" style="border:1px solid #888; padding:16px; width:100%; max-width:500px;">
+    <div id="mensajes" style="height:200px; overflow-y:auto; border-bottom:1px solid #ccc; margin-bottom:10px;"></div>
+    <form id="formChatbot" method="post" autocomplete="off">
+        {% csrf_token %}
+        <input type="text" name="pregunta" id="pregunta" placeholder="Escribe tu pregunta..." style="width:75%;" required>
+        <button type="submit">Enviar</button>
+    </form>
+</div>
+<script>
+    document.getElementById('formChatbot').onsubmit = async function(e) {
+        e.preventDefault();
+        const pregunta = document.getElementById('pregunta').value;
+        const mensajes = document.getElementById('mensajes');
+        mensajes.innerHTML += `<div><b>Tú:</b> ${pregunta}</div>`;
+        document.getElementById('pregunta').value = '';
+        const response = await fetch("{% url 'academico:chatbot_faq' %}", {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `pregunta=${encodeURIComponent(pregunta)}`
+        });
+        const data = await response.json();
+        mensajes.innerHTML += `<div><b>Chatbot:</b> ${data.respuesta}</div>`;
+        mensajes.scrollTop = mensajes.scrollHeight;
+    };
+</script>
+{% endblock %}

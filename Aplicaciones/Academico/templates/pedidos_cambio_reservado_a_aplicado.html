@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+
+{% block title %}Pedidos Aplicados (Cambio de Reservado a Aplicado){% endblock %}
+
+{% block body %}
+<style>
+    .compact-table th,
+    .compact-table td {
+        padding: .25rem .3rem !important;
+        line-height: 1 !important;
+        font-size: 0.65rem !important;
+    }
+
+    .section-title {
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        color: white;
+        font-size: 1.25rem;
+        padding-left: 0.5rem;
+    }
+</style>
+
+<div class="container-fluid px-0 py-1">
+
+    <!-- PEDIDOS APLICADOS - LIMA -->
+    <h2 class="section-title">Pedidos Aplicados - Zona Lima</h2>
+    <div class="table-responsive bg-white p-1 rounded mb-4">
+        <table class="table table-sm compact-table w-100">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Pedido</th>
+                    <th>Fecha</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ped in pedidos_lima %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ ped.numero }}</td>
+                    <td>{{ ped.fecha_creacion|date:"d/m/Y" }}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info" data-bs-toggle="modal"
+                            data-bs-target="#detallePedidoModal-{{ ped.id }}">
+                            Ver detalles
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr class="text-center">
+                    <td colspan="4">No hay pedidos aplicados en Lima.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- PEDIDOS APLICADOS - PROVINCIA -->
+    <h2 class="section-title">Pedidos Aplicados - Zona Provincia</h2>
+    <div class="table-responsive bg-white p-1 rounded mb-4">
+        <table class="table table-sm compact-table w-100">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Pedido</th>
+                    <th>Fecha</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ped in pedidos_provincia %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ ped.numero }}</td>
+                    <td>{{ ped.fecha_creacion|date:"d/m/Y" }}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info" data-bs-toggle="modal"
+                            data-bs-target="#detallePedidoModal-{{ ped.id }}">
+                            Ver detalles
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr class="text-center">
+                    <td colspan="4">No hay pedidos aplicados en Provincia.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block modals %}
+<!-- Modals de detalle pedidos para Lima -->
+{% for ped in pedidos_lima %}
+<div class="modal fade" id="detallePedidoModal-{{ ped.id }}" tabindex="-1"
+    aria-labelledby="detallePedidoLabel-{{ ped.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detallePedidoLabel-{{ ped.id }}">Detalles del Pedido {{ ped.numero }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                {% if ped.localidad %}
+                <p><strong>Localidad destino:</strong> {{ ped.localidad }}</p>
+                {% endif %}
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Código</th>
+                            <th>Nombre</th>
+                            <th>Serie</th>
+                            <th>Fecha estimada</th>
+                            <th>Fecha de entrega</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for li in ped.lineas.all %}
+                        {% if li.item.estado == "Aplicado" and li.fecha_entregada_real %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ li.item.codigo }}</td>
+                            <td>{{ li.item.nombre }}</td>
+                            <td>{{ li.item.numerodeserie }}</td>
+                            <td>{{ li.fecha_entrega_estimada|date:"d/m/Y" }}</td>
+                            <td>{{ li.fecha_entregada_real|date:"d/m/Y" }}</td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Modals de detalle pedidos para Provincia -->
+{% for ped in pedidos_provincia %}
+<div class="modal fade" id="detallePedidoModal-{{ ped.id }}" tabindex="-1"
+    aria-labelledby="detallePedidoLabel-{{ ped.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detallePedidoLabel-{{ ped.id }}">Detalles del Pedido {{ ped.numero }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                {% if ped.localidad %}
+                <p><strong>Localidad destino:</strong> {{ ped.localidad }}</p>
+                {% endif %}
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Código</th>
+                            <th>Nombre</th>
+                            <th>Serie</th>
+                            <th>Fecha estimada</th>
+                            <th>Fecha de entrega</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for li in ped.lineas.all %}
+                        {% if li.item.estado == "Aplicado" and li.fecha_entregada_real %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ li.item.codigo }}</td>
+                            <td>{{ li.item.nombre }}</td>
+                            <td>{{ li.item.numerodeserie }}</td>
+                            <td>{{ li.fecha_entrega_estimada|date:"d/m/Y" }}</td>
+                            <td>{{ li.fecha_entregada_real|date:"d/m/Y" }}</td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Historial de proyecciones{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+
+  <!-- MENSAJE FLASH -->
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-success text-center mb-3" id="flash-msg">
+        {{ message }}
+      </div>
+    {% endfor %}
+    <script>
+      setTimeout(() => {
+        const msg = document.getElementById('flash-msg');
+        if (msg) msg.style.display = 'none';
+      }, 3000);
+    </script>
+  {% endif %}
+
+  <!-- TÍTULO -->
+  <div class="text-center mb-4">
+    <h2 class="fw-bold text-white py-3 px-4 rounded shadow-lg"
+        style="background-color:#222; font-size:2.2rem; border-left:8px solid #b41f3a;">
+      📊 Historial de Proyecciones Registradas
+    </h2>
+  </div>
+
+  <!-- BOTÓN LIMPIAR -->
+  <div class="d-flex justify-content-end mb-3">
+    <form method="POST" action="{% url 'academico:limpiar_historial_mape' %}"
+          onsubmit="return confirm('⚠️ Esto eliminará TODO el historial de MAPE y proyecciones. ¿Estás seguro?');">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">
+        🧹 Limpiar TODO
+      </button>
+    </form>
+  </div>
+
+  <!-- TABLA -->
+  <div class="table-responsive">
+    <table class="table table-striped table-bordered align-middle text-center shadow-sm">
+      <thead class="table-dark">
+        <tr>
+          <th>#</th>
+          <th>Fecha</th>
+          <th>Ítem</th>
+          <th>Venta Real</th>
+          <th>Venta Proyectada</th>
+          <th>MAPE (%)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in proyecciones %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ p.fecha|date:"Y-m-d" }}</td>
+          <td>{{ p.item.nombre }}</td>
+          <td>{{ p.venta_real }}</td>
+          <td>{{ p.venta_proyectada }}</td>
+          <td>{{ p.mape_individual|floatformat:2 }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6">Sin proyecciones registradas.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="text-center mt-4">
+    <a href="{% url 'academico:ver_mape' %}" class="btn btn-outline-secondary">⬅️ Volver</a>
+  </div>
+</div>
+{% endblock %}
+
+
+
+

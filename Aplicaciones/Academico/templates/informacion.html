@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block title %}Centro de Ayuda y Documentación — Bancom{% endblock %}
+{% block body %}
+<div class="info-pro-wrapper">
+    <div class="info-pro-card">
+        <h1>Centro de Información Bancom</h1>
+        <p class="info-pro-lead">
+            Revisa aquí los manuales, guías y conceptos clave para usar correctamente el sistema de gestión logística interna de Bancom.
+        </p>
+        <!-- MANUAL DE USUARIO PROFESIONAL -->
+        <div class="info-pro-section">
+            <h2>Manual de Usuario</h2>
+            <p>
+                El sistema Bancom está diseñado para facilitar y optimizar la gestión logística interna de la empresa.<br>
+                Este manual ofrece una guía paso a paso para operar cada módulo del sistema, asegurando un uso eficiente y seguro de la plataforma.<br><br>
+                <b>Principales funcionalidades:</b>
+                <ul class="info-pro-list">
+                    <li><b>Inventario:</b> Consulta, importa y actualiza todos los equipos y productos registrados. Utiliza la carga masiva mediante archivos Excel para mantener los datos al día.</li>
+                    <li><b>Hardware y Periféricos:</b> Administra el equipamiento disponible, visualiza el estado y cantidad de cada recurso, y recibe alertas automáticas cuando un producto esté bajo de stock.</li>
+                    <li><b>Pedidos:</b> Genera, revisa y administra pedidos internos, distinguiendo entre pedidos reservados y aplicados, con control sobre la entrega a tiempo según la zona.</li>
+                    <li><b>Indicadores de Gestión:</b> Accede fácilmente a métricas clave como el porcentaje de entregas a tiempo (OTD) y la precisión de los pronósticos (MAPE) para una toma de decisiones informada.</li>
+                    <li><b>Histórico y Trazabilidad:</b> Consulta todo el historial de cálculos, proyecciones, y operaciones realizadas para auditoría y mejora continua.</li>
+                </ul>
+                <b>Recomendaciones de uso:</b>
+                <ul class="info-pro-list">
+                    <li>Actualiza regularmente la información del inventario para asegurar la confiabilidad de los datos.</li>
+                    <li>Utiliza el chatbot para resolver dudas rápidas o consultar métricas al instante.</li>
+                    <li>Consulta la sección de indicadores para evaluar el desempeño logístico y ajustar procesos según los resultados.</li>
+                    <li>En caso de errores o dudas, comunícate con el equipo de soporte interno de Bancom.</li>
+                </ul>
+                <span class="info-pro-mini">¿Dudas rápidas? Usa el chatbot (<i class="bi bi-robot"></i>) en la esquina para consultas instantáneas.</span>
+            </p>
+        </div>
+        <!-- GUÍA DE INDICADORES LOGÍSTICOS -->
+        <div class="info-pro-section">
+            <h2>Guía de Indicadores Logísticos</h2>
+            <ul class="info-pro-list">
+                <li>
+                    <b>Entregas a Tiempo (OTD):</b> Mide el porcentaje de pedidos entregados dentro del plazo establecido.<br>
+                    &nbsp;&nbsp;&bull; <b>Lima:</b> Máx. 4 días hábiles<br>
+                    &nbsp;&nbsp;&bull; <b>Provincia:</b> Máx. 7 días hábiles
+                </li>
+                <li>
+                    <b>Precisión de Pronóstico (MAPE):</b> Evalúa la precisión de tus estimaciones de demanda.<br>
+                    Un MAPE bajo significa una mejor planificación y menor error en los pronósticos.
+                </li>
+            </ul>
+        </div>
+        <!-- RECURSOS DE SOPORTE -->
+        <div class="info-pro-section">
+            <h2>Recursos de Soporte</h2>
+            <ul class="info-pro-list">
+                <li>Contacta a soporte interno Bancom ante cualquier inconveniente.</li>
+                <li>Accede a materiales y capacitación bajo demanda.</li>
+                <li>Mantente informado sobre actualizaciones y buenas prácticas desde este panel.</li>
+            </ul>
+        </div>
+        <div class="info-pro-footer">
+            <span>Bancom © 2025 — Sistema de Gestión Logística Interna</span>
+        </div>
+    </div>
+</div>
+
+<style>
+.info-pro-wrapper {
+    min-height: 90vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    margin-top: 38px;
+}
+.info-pro-card {
+    background: #fff;
+    border-radius: 20px;
+    max-width: 550px;
+    width: 98vw;
+    margin: 0 auto 36px auto;
+    padding: 38px 38px 20px 38px;
+    box-shadow: 0 8px 32px #0001, 0 1.5px 0 #d32f2f33;
+    font-family: 'Inter', Arial, sans-serif;
+}
+.info-pro-card h1 {
+    font-size: 1.38rem;
+    font-weight: 700;
+    margin: 0 0 13px 0;
+    color: #d32f2f;
+    text-align: center;
+    letter-spacing: .01em;
+}
+.info-pro-lead {
+    font-size: 15px;
+    color: #252525;
+    text-align: center;
+    margin-bottom: 28px;
+}
+.info-pro-section {
+    border-left: 3.5px solid #d32f2f19;
+    margin-bottom: 22px;
+    padding-left: 19px;
+}
+.info-pro-section h2 {
+    font-size: 1.07rem;
+    font-weight: 600;
+    color: #ad1818;
+    margin-bottom: 7px;
+    margin-top: 7px;
+    letter-spacing: .01em;
+}
+.info-pro-section p,
+.info-pro-section ul {
+    font-size: 13.5px;
+    color: #373737;
+    margin: 0 0 4px 0;
+}
+.info-pro-list {
+    padding-left: 12px;
+    margin: 0 0 0 0;
+    list-style: disc;
+}
+.info-pro-mini {
+    color: #b54c4c;
+    font-size: 12px;
+    margin-top: 3px;
+    display: block;
+}
+.info-pro-footer {
+    text-align: center;
+    margin-top: 30px;
+    color: #222;
+    font-size: 11.5px;
+    letter-spacing: .02em;
+    opacity: .76;
+}
+@media (max-width: 600px) {
+    .info-pro-card { padding: 13px 5vw 14px 5vw; }
+    .info-pro-wrapper { margin-top: 9px;}
+}
+</style>
+{% endblock %}
+

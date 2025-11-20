@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Historial MAPE{% endblock %}
+
+{% block body %}
+<link rel="stylesheet" href="{% static 'css/custom.css' %}">
+
+<!-- ── NARANJA PERSONAL ── -->
+<style>
+  /*  ‼️ Si ya lo definiste en custom.css, borra este <style>  */
+  .bg-orange-light {background:#ffdc9c !important;}      /* fondo suave   */
+  .badge-orange     {background:#ff9f40 !important;}      /* badge intenso */
+  .mape-promedio-card.bg-success   { background: #38b745 !important; color: #222 !important; }
+  .mape-promedio-card.bg-warning   { background: #ffd95e !important; color: #222 !important; }
+  .mape-promedio-card.bg-orange    { background: #ffb950 !important; color: #222 !important; }
+  .mape-promedio-card.bg-danger    { background: #f05e62 !important; color: #222 !important; }
+  .mape-promedio-card.bg-secondary { background: #7b7d85 !important; color: #fff  !important; }
+  .mape-promedio-card .card-title,
+  .mape-promedio-card .card-value  { color: #222 !important; }
+  .mape-promedio-card.bg-secondary .card-title,
+  .mape-promedio-card.bg-secondary .card-value { color: #fff !important; }
+</style>
+
+<div class="container py-5">
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-success text-center mb-3" id="flash-msg">{{ message }}</div>
+    {% endfor %}
+    <script>
+      setTimeout(() => {
+        const m=document.getElementById('flash-msg'); if(m) m.style.display='none';
+      },3000);
+    </script>
+  {% endif %}
+
+  <div class="row justify-content-between align-items-center mb-4">
+    <div class="col-md-7 text-center text-md-start">
+      <h1 class="fw-bold text-white py-3 px-4 rounded shadow-lg"
+          style="background:#222;font-size:2.2rem;border-left:8px solid #b41f3a;">
+        📊 Historial de Precisión de Pronósticos
+      </h1>
+    </div>
+    <div class="col-md-5 text-center text-md-end">
+      <form method="post" action="{% url 'academico:limpiar_proyecciones' %}" class="d-inline">
+        {% csrf_token %}
+        <button class="btn btn-outline-danger me-2">🗑️ Borrar Proyecciones</button>
+      </form>
+      <form method="post" action="{% url 'academico:limpiar_historial_mape' %}"
+            onsubmit="return confirm('¿Estás seguro de eliminar TODO el historial? Esta acción no se puede deshacer.');"
+            class="d-inline">
+        {% csrf_token %}
+        <button class="btn btn-danger">🧹 Limpiar TODO</button>
+      </form>
+    </div>
+  </div>
+
+<!-- PROMEDIO MAPE GLOBAL -->
+<div class="row justify-content-center mb-4">
+  <div class="col-md-8 text-center">
+    {% if tiene_mape %}
+  <div class="card shadow-sm mape-promedio-card
+    {% if promedio_mape <= 10 %}
+      mape-bg-success
+    {% elif promedio_mape <= 20 %}
+      mape-bg-warning
+    {% elif promedio_mape <= 50 %}
+      mape-bg-orange
+    {% else %}
+      mape-bg-danger
+    {% endif %}"
+    style="border-radius:32px; padding:2.5rem 2rem; border:none; max-width:560px; margin:0 auto 20px;">
+    <div class="card-title" style="font-size:2rem; font-weight:700; margin-bottom:10px;">
+      Promedio MAPE Global
+    </div>
+    <div class="card-value" style="font-size:3rem; font-weight:900;">
+      {{ promedio_mape|floatformat:2 }}%
+    </div>
+  </div>
+{% else %}
+  <div class="card shadow-sm mt-3 bg-secondary text-white text-center"
+       style="border-radius: 18px; border: none; box-shadow: 0 8px 30px #0002;
+              padding: 28px 18px 16px 18px; margin: 0 auto;">
+    <div class="card-body">
+      <h5 class="mb-0" style="font-weight: 600;">
+        Aún no hay datos para calcular el MAPE global
+      </h5>
+    </div>
+  </div>
+{% endif %}
+
+
+  <!-- ───── TABLA CLASIFICACIÓN VISUAL ───── -->
+  <div class="row justify-content-center mb-5">
+    <div class="col-md-8">
+      <div class="card shadow-sm">
+        <div class="card-body p-0">
+          <table class="table table-sm text-center mb-0">
+            <thead class="table-dark">
+              <tr><th colspan="3">Clasificación de colores por MAPE</th></tr>
+              <tr><th>MAPE (%)</th><th>Interpretación</th><th>Color</th></tr>
+            </thead>
+            <tbody>
+              <tr class="table-success">
+                <td>0 % – 10 %</td><td>Muy buena precisión</td>
+                <td><span class="badge bg-success">Verde</span></td>
+              </tr>
+              <tr class="table-warning">
+                <td>10 % – 20 %</td><td>Buena precisión</td>
+                <td><span class="badge bg-warning text-dark">Amarillo</span></td>
+              </tr>
+              <tr class="bg-orange-light">
+                <td>20 % – 50 %</td><td>Precisión pobre</td>
+                <td><span class="badge badge-orange">Naranja</span></td>
+              </tr>
+              <tr class="table-danger">
+                <td>&gt; 50 %</td><td>Muy pobre</td>
+                <td><span class="badge bg-danger">Rojo</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───── TABLA HISTÓRICO ───── -->
+  <div class="table-responsive">
+    <table class="table table-striped table-bordered align-middle text-center shadow-sm">
+      <thead class="table-dark">
+        <tr>
+          <th>#</th><th>Fecha y hora</th><th>Ítem</th><th>MAPE (%)</th><th>Tipo de Error</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for h in historico %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ h.fecha|date:"d/m/Y H:i" }}</td>
+          <td>{{ h.item_nombre }}</td>
+          <td>{{ h.mape_str }}</td>
+          <td>
+            {% if h.tipo_error == "Favorable" %}
+              <span class="badge bg-success">✅ Favorable</span>
+            {% elif h.tipo_error == "Aceptable" %}
+              <span class="badge bg-warning text-dark">🟡 Aceptable</span>
+            {% elif h.tipo_error == "Revisar" %}
+              <span class="badge badge-orange">🟠 Revisar</span>
+            {% elif h.tipo_error == "Crítico" %}
+              <span class="badge bg-danger">🔴 Crítico</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">No hay cálculos de MAPE registrados.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ───── BOTONES INFERIORES ───── -->
+  <div class="text-center mt-4">
+    <a href="{% url 'academico:calcular_mape' %}" class="btn btn-outline-secondary me-2">⟵ Volver a Calcular</a>
+    <a href="{% url 'academico:historial_mape' %}" class="btn btn-primary">Ver Historial completo</a>
+  </div>
+</div>
+{% endblock %}
+
