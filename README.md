@@ -107,8 +107,8 @@ Si deseas probar el código en tu entorno local:
 
 ## 👥 Autores
 
-* **Jorge Eduardo Mendoza Pacheco** - *Fullstack Developer & Cloud Architecture* - [GitHub](https://github.com/jorgemendozapacheco-blip) | [LinkedIn](https://www.linkedin.com/in/jorge-mendoza-pachecoo)
-* **Fabricio Aguilar Quispe** - *Backend & Data Analyst*
+* **Jorge Eduardo Mendoza Pacheco** - *Data Analyst & Cloud Architecture* - [GitHub](https://github.com/jorgemendozapacheco-blip) | [LinkedIn](https://www.linkedin.com/in/jorge-mendoza-pachecoo)
+* **Fabricio Aguilar Quispe** - *Backend & Fullstack Developer *
 * **Kevin Espinoza Cayhualla** - *Frontend & QA*
 
 ---
